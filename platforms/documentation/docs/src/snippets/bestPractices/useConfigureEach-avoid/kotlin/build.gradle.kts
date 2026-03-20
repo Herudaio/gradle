@@ -1,0 +1,9 @@
+plugins {
+    java
+}
+
+// tag::avoid-this[]
+tasks.withType<JavaCompile> { // <1>
+    options.encoding = "UTF-8"
+}
+// end::avoid-this[]

@@ -1,0 +1,9 @@
+plugins {
+    java
+}
+
+// tag::do-this[]
+tasks.withType<JavaCompile>().configureEach { // <1>
+    options.encoding = "UTF-8"
+}
+// end::do-this[]

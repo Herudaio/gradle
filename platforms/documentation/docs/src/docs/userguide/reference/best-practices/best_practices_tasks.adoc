@@ -555,3 +555,55 @@ Now when running `consumer` task, then `greeterB`, the `consumer` task remains `
 
 === Tags
 `<<tags_reference.adoc#tag:tasks,#tasks>>`, `<<tags_reference.adoc#tag:inputs-and-outputs,#inputs-and-outputs>>`
+
+[[use_configure_each]]
+== Prefer `withType().configureEach()` over `withType()` for Task Configuration
+
+Use link:{javadocPath}/org/gradle/api/tasks/TaskCollection.html#configureEach(org.gradle.api.Action)[`configureEach`] when applying configuration to all tasks of a given type.
+
+=== Explanation
+
+link:{javadocPath}/org/gradle/api/tasks/TaskCollection.html#withType(java.lang.Class)[`withType(type)`] followed by a configuration block eagerly configures every matching task immediately during the configuration phase, regardless of whether any of those tasks will actually be executed.
+
+link:{javadocPath}/org/gradle/api/tasks/TaskCollection.html#configureEach(org.gradle.api.Action)[`withType(type).configureEach {}`] defers configuration until each task is about to be executed.
+This avoids unnecessary work during configuration and is the idiomatic approach to <<task_configuration_avoidance.adoc#task_configuration_avoidance,Task Configuration Avoidance>>.
+
+Eager configuration can noticeably slow down the configuration phase in large builds with many tasks, even when only a small number of them are actually going to run.
+
+=== Example
+
+==== Don't Do This
+
+====
+include::sample[dir="snippets/bestPractices/useConfigureEach-avoid/kotlin",files="build.gradle.kts[tags=avoid-this]"]
+include::sample[dir="snippets/bestPractices/useConfigureEach-avoid/groovy",files="build.gradle[tags=avoid-this]"]
+====
+
+<1> *Eager configuration*: All `JavaCompile` tasks are configured immediately at configuration time, even if none of them will be executed during this build.
+
+==== Do This Instead
+
+++++
+<div style="text-align: right;">
+  <a class="download-project-link"
+     data-base-path="https://github.com/gradle/gradle/tree/master/platforms/documentation/docs/src/snippets/bestPractices/useConfigureEach-do/"
+     href="https://download-directory.github.io/?url=https://github.com/gradle/gradle/tree/master/platforms/documentation/docs/src/snippets/bestPractices/useConfigureEach-do/kotlin">
+    <img src="https://img.shields.io/badge/Download%20Project-GitHub-blue?logo=github&style=flat" alt="Download"/>
+  </a>
+</div>
+++++
+
+====
+include::sample[dir="snippets/bestPractices/useConfigureEach-do/kotlin",files="build.gradle.kts[tags=do-this]"]
+include::sample[dir="snippets/bestPractices/useConfigureEach-do/groovy",files="build.gradle[tags=do-this]"]
+====
+
+<1> *Lazy configuration*: Each `JavaCompile` task is only configured when Gradle determines it will be executed, avoiding unnecessary work during the configuration phase.
+
+=== References
+
+- <<task_configuration_avoidance.adoc#task_configuration_avoidance,Task Configuration Avoidance>>
+
+=== Tags
+
+`<<tags_reference.adoc#tag:tasks,#tasks>>`, `<<tags_reference.adoc#tag:task-configuration-avoidance,#task-configuration-avoidance>>`
